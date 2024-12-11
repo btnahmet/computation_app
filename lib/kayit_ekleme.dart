@@ -268,6 +268,7 @@
 // }
 import 'package:flutter/material.dart';
 import 'package:computation_app/ogun_ekleme.dart';
+import 'tahsilat.dart';
 
 class KayitEkleme extends StatefulWidget {
   const KayitEkleme({
@@ -424,132 +425,134 @@ class _KayitEklemeState extends State<KayitEkleme> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF00796B),
-        title: Text(
-          widget.title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                controller: _dateController,
-                readOnly: true,
-                decoration: const InputDecoration(
-                  labelText: 'Tarih Seçin',
-                  suffixIcon: Icon(Icons.calendar_today),
-                  border: OutlineInputBorder(),
-                ),
-                onTap: () async {
-                  DateTime? pickedDate = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2101),
-                  );
-                  if (pickedDate != null) {
-                    setState(() {
-                      _dateController.text =
-                          "${pickedDate.toLocal()}".split(' ')[0];
-                    });
-                  }
-                },
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _textController,
-                decoration: const InputDecoration(
-                  labelText: 'İsim - Soyisim - Köy',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _totalDebtController,
-                readOnly: true,
-                decoration: const InputDecoration(
-                  labelText: 'Müşteri Toplam Borcu',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  _navigateToMealAddPage();
-                },
-                child: const Text("Öğün Ekleme"),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                height: MediaQuery.of(context).size.height * 0.3,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: _meals.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 10),
-                      child: ListTile(
-                        title: Text('${_meals[index]['name']}'),
-                        subtitle:
-                            Text('Toplam Maliyet: ${_meals[index]['cost3']}₺'),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () {
-                                _navigateToMealAddPage(
-                                  currentMealName: _meals[index]['name'],
-                                  currentMealCost3: _meals[index]['cost3'],
-                                  currentMealCost2: _meals[index]['cost2'],
-                                  currentMealCost1: _meals[index]['cost1'],
-                                  index: index,
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                _confirmDelete2(index);
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      bottomNavigationBar: Container(
-        color: Colors.transparent,
-        padding: const EdgeInsets.all(16.0),
-        child: ElevatedButton(
-          onPressed: _saveData,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.teal,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF00796B),
+          title: Text(
+            widget.title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+              color: Colors.white,
             ),
           ),
-          child: const Text(
-            "Müşteriyi Kaydet",
-            style: TextStyle(fontSize: 18),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: _dateController,
+                  readOnly: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Tarih Seçin',
+                    suffixIcon: Icon(Icons.calendar_today),
+                    border: OutlineInputBorder(),
+                  ),
+                  onTap: () async {
+                    DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2101),
+                    );
+                    if (pickedDate != null) {
+                      setState(() {
+                        _dateController.text =
+                            "${pickedDate.toLocal()}".split(' ')[0];
+                      });
+                    }
+                  },
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _textController,
+                  decoration: const InputDecoration(
+                    labelText: 'İsim - Soyisim - Köy',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _totalDebtController,
+                  readOnly: true,
+                  decoration: const InputDecoration(
+                    labelText: 'Müşteri Toplam Borcu',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    _navigateToMealAddPage();
+                  },
+                  child: const Text("Öğün Ekleme"),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.3,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _meals.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        child: ListTile(
+                          title: Text('${_meals[index]['name']}'),
+                          subtitle:
+                              Text('Toplam Maliyet: ${_meals[index]['cost3']}₺'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () {
+                                  _navigateToMealAddPage(
+                                    currentMealName: _meals[index]['name'],
+                                    currentMealCost3: _meals[index]['cost3'],
+                                    currentMealCost2: _meals[index]['cost2'],
+                                    currentMealCost1: _meals[index]['cost1'],
+                                    index: index,
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {
+                                  _confirmDelete2(index);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        bottomNavigationBar: Container(
+          color: Colors.transparent,
+          padding: const EdgeInsets.all(16.0),
+          child: ElevatedButton(
+            onPressed: _saveData,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.teal,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              "Müşteriyi Kaydet",
+              style: TextStyle(fontSize: 18),
+            ),
           ),
         ),
       ),
