@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:computation_app/ogun_ekleme.dart';
-import 'tahsilat.dart';
+// import 'tahsilat.dart';
 
 class KayitEkleme extends StatefulWidget {
   const KayitEkleme({

@@ -382,6 +382,7 @@
 //   }
 // }
 // ANA SAYFA CLASS ESKİ HALİ
+// // import 'package:computation_app/tahsilat.dart';
 // // import 'package:flutter/material.dart';
 // // import 'package:computation_app/kayit_ekleme.dart';
 
@@ -409,6 +410,64 @@
 // //         _customers.add(customerData); // Gelen veriyi müşteri listesine ekle
 // //       });
 // //     }
+// //   }
+
+// //   // Kayıt düzenleme işlemi
+// //   void _editCustomer(int index) async {
+// //     final updatedCustomer = await Navigator.push(
+// //       context,
+// //       MaterialPageRoute(
+// //         builder: (context) => KayitEkleme(
+// //           title: "Müşteri Düzenle",
+// //           existingCustomer: _customers[index], // Mevcut müşteri bilgileri
+// //         ),
+// //       ),
+// //     );
+
+// //     if (updatedCustomer != null) {
+// //       setState(() {
+// //         _customers[index] =
+// //             updatedCustomer; // Eski kaydı güncel bilgiyle değiştir
+// //       });
+// //     }
+// //   }
+
+// //   // Kayıt silme fonksiyonu
+// //   void _deleteCustomer(int index) {
+// //     setState(() {
+// //       _customers.removeAt(index); // Belirtilen indeksteki kaydı sil
+// //     });
+// //   }
+
+// //   // Silme işlemi için onay diyaloğu
+// //   void _confirmDelete(int index) {
+// //     showDialog(
+// //       context: context,
+// //       builder: (BuildContext context) {
+// //         return AlertDialog(
+// //           // title: const Text("Silme Onayı"),
+// //           content: const Text("Silmek istediğinizden emin misiniz?"),
+// //           actions: [
+// //             TextButton(
+// //               onPressed: () {
+// //                 Navigator.of(context).pop(); // Diyaloğu kapat
+// //               },
+// //               child: const Text("Hayır"),
+// //             ),
+// //             ElevatedButton(
+// //               onPressed: () {
+// //                 Navigator.of(context).pop(); // Diyaloğu kapat
+// //                 _deleteCustomer(index); // Kaydı sil
+// //               },
+// //               // style: ElevatedButton.styleFrom(
+// //               //   backgroundColor: Colors.red,
+// //               // ),
+// //               child: const Text("Evet"),
+// //             ),
+// //           ],
+// //         );
+// //       },
+// //     );
 // //   }
 
 // //   @override
@@ -451,21 +510,62 @@
 // //                             color: Colors.teal),
 // //                         title: Text(
 // //                           "${customer['name']}",
-// //                           style: const TextStyle(fontWeight: FontWeight.bold),
+// //                           style: const TextStyle(
+// //                             fontWeight: FontWeight.bold,
+// //                             fontSize: 17,
+// //                           ),
 // //                         ),
 // //                         subtitle: Text("Tarih: ${customer['date']}"),
+// //                         trailing: Row(
+// //                           mainAxisSize: MainAxisSize.min,
+// //                           children: [
+// //                             IconButton(
+// //                               icon: const Icon(Icons.edit, color: Colors.blue),
+// //                               onPressed: () => _editCustomer(index),
+// //                             ),
+// //                             IconButton(
+// //                               icon: const Icon(Icons.delete,
+// //                                   color: Color.fromARGB(255, 22, 15, 14)),
+// //                               onPressed: () => _confirmDelete(index),
+// //                             ),
+// //                           ],
+// //                         ),
 // //                         children: [
+// //                           const Divider(),
 // //                           ListTile(
 // //                             title:
 // //                                 Text("Toplam Borç: ${customer['totalDebt']}₺"),
+// //                           ),
+// //                           // const SizedBox(height: 0,),
+// //                           Center(
+// //                             child: ElevatedButton(
+// //                               onPressed: () {
+// //                                 Navigator.push(
+// //                                   context,
+// //                                   MaterialPageRoute(
+// //                                     builder: (context) =>
+// //                                         Tahsilat(title: "",
+// //                                         totalDebt: customer['totalDebt'], // Toplam Borç bilgisi gönderiliyor
+// //                                         ),
+
+// //                                   ),
+// //                                 );
+// //                               },
+// //                               style: ElevatedButton.styleFrom(
+// //                                 backgroundColor:
+// //                                     const Color.fromARGB(255, 80, 230, 215),
+// //                               ),
+// //                               child: const Text("Müşteri Tahsilat Bilgisi"),
+// //                             ),
 // //                           ),
 // //                           const Divider(),
 // //                           const Padding(
 // //                             padding: EdgeInsets.symmetric(horizontal: 16.0),
 // //                             child: Text(
-// //                               "Öğünler:",
+// //                               "Öğünler",
 // //                               style: TextStyle(
 // //                                 fontWeight: FontWeight.bold,
+// //                                 fontSize: 20,
 // //                               ),
 // //                             ),
 // //                           ),
@@ -476,7 +576,12 @@
 // //                               padding:
 // //                                   const EdgeInsets.symmetric(vertical: 4.0),
 // //                               child: ListTile(
-// //                                 title: Text(meal['name']),
+// //                                 title: Text(
+// //                                   meal['name'],
+// //                                   style: TextStyle(
+// //                                     fontWeight: FontWeight.bold,
+// //                                   ),
+// //                                 ),
 // //                                 subtitle: Text("Maliyet: ${meal['cost3']}₺"),
 // //                               ),
 // //                             );
@@ -497,7 +602,8 @@
 // //   }
 // // }
 // import 'package:flutter/material.dart';
-// import 'package:computation_app/kayit_ekleme.dart';
+// import 'tahsilat.dart';
+// import 'kayit_ekleme.dart';
 
 // class AnaSayfa extends StatefulWidget {
 //   const AnaSayfa({super.key});
@@ -525,11 +631,85 @@
 //     }
 //   }
 
-//     // Kayıt silme fonksiyonu
+//   // Kayıt düzenleme işlemi
+//   void _editCustomer(int index) async {
+//     final updatedCustomer = await Navigator.push(
+//       context,
+//       MaterialPageRoute(
+//         builder: (context) => KayitEkleme(
+//           title: "Müşteri Düzenle",
+//           existingCustomer: _customers[index], // Mevcut müşteri bilgileri
+//         ),
+//       ),
+//     );
+
+//     if (updatedCustomer != null) {
+//       setState(() {
+//         _customers[index] =
+//             updatedCustomer; // Eski kaydı güncel bilgiyle değiştir
+//       });
+//     }
+//   }
+
+//   // Kayıt silme fonksiyonu
 //   void _deleteCustomer(int index) {
 //     setState(() {
 //       _customers.removeAt(index); // Belirtilen indeksteki kaydı sil
 //     });
+//   }
+
+//   // Tahsilat sayfasına yönlendirme ve veri alma
+//   void _navigateToTahsilat(int index) async {
+//     final customer = _customers[index];
+
+//     final tahsilatData = await Navigator.push(
+//       context,
+//       MaterialPageRoute(
+//         builder: (context) => Tahsilat(
+//           title: "Tahsilat Bilgisi",
+//           totalDebt: customer['totalDebt'],
+//           previousPayments: customer['payments'] != null
+//               ? (customer['payments'] as List<dynamic>)
+//                   .map((e) => Map<String, String>.from(e))
+//                   .toList()
+//               : [],
+//         ),
+//       ),
+//     );
+
+//     if (tahsilatData != null) {
+//       setState(() {
+//         customer['payments'] = tahsilatData['payments'];
+//         customer['currentDebt'] = tahsilatData['currentDebt'];
+//       });
+//     }
+//   }
+
+//   // Silme işlemi için onay diyaloğu
+//   void _confirmDelete(int index) {
+//     showDialog(
+//       context: context,
+//       builder: (BuildContext context) {
+//         return AlertDialog(
+//           content: const Text("Silmek istediğinizden emin misiniz?"),
+//           actions: [
+//             TextButton(
+//               onPressed: () {
+//                 Navigator.of(context).pop(); // Diyaloğu kapat
+//               },
+//               child: const Text("Hayır"),
+//             ),
+//             ElevatedButton(
+//               onPressed: () {
+//                 Navigator.of(context).pop(); // Diyaloğu kapat
+//                 _deleteCustomer(index); // Kaydı sil
+//               },
+//               child: const Text("Evet"),
+//             ),
+//           ],
+//         );
+//       },
+//     );
 //   }
 
 //   @override
@@ -572,7 +752,10 @@
 //                             color: Colors.teal),
 //                         title: Text(
 //                           "${customer['name']}",
-//                           style: const TextStyle(fontWeight: FontWeight.bold),
+//                           style: const TextStyle(
+//                             fontWeight: FontWeight.bold,
+//                             fontSize: 17,
+//                           ),
 //                         ),
 //                         subtitle: Text("Tarih: ${customer['date']}"),
 //                         trailing: Row(
@@ -580,28 +763,39 @@
 //                           children: [
 //                             IconButton(
 //                               icon: const Icon(Icons.edit, color: Colors.blue),
-//                               onPressed: () {
-//                                 // Düzenleme işlemi burada yapılacak
-//                               },
+//                               onPressed: () => _editCustomer(index),
 //                             ),
 //                             IconButton(
-//                               icon: const Icon(Icons.delete, color: Colors.red),
-//                               onPressed: () => _deleteCustomer(index),
+//                               icon: const Icon(Icons.delete,
+//                                   color: Color.fromARGB(255, 22, 15, 14)),
+//                               onPressed: () => _confirmDelete(index),
 //                             ),
 //                           ],
 //                         ),
 //                         children: [
+//                           const Divider(),
 //                           ListTile(
 //                             title:
 //                                 Text("Toplam Borç: ${customer['totalDebt']}₺"),
+//                           ),
+//                           Center(
+//                             child: ElevatedButton(
+//                               onPressed: () => _navigateToTahsilat(index),
+//                               style: ElevatedButton.styleFrom(
+//                                 backgroundColor:
+//                                     const Color.fromARGB(255, 80, 230, 215),
+//                               ),
+//                               child: const Text("Müşteri Tahsilat Bilgisi"),
+//                             ),
 //                           ),
 //                           const Divider(),
 //                           const Padding(
 //                             padding: EdgeInsets.symmetric(horizontal: 16.0),
 //                             child: Text(
-//                               "Öğünler:",
+//                               "Öğünler",
 //                               style: TextStyle(
 //                                 fontWeight: FontWeight.bold,
+//                                 fontSize: 20,
 //                               ),
 //                             ),
 //                           ),
@@ -612,7 +806,12 @@
 //                               padding:
 //                                   const EdgeInsets.symmetric(vertical: 4.0),
 //                               child: ListTile(
-//                                 title: Text(meal['name']),
+//                                 title: Text(
+//                                   meal['name'],
+//                                   style: const TextStyle(
+//                                     fontWeight: FontWeight.bold,
+//                                   ),
+//                                 ),
 //                                 subtitle: Text("Maliyet: ${meal['cost3']}₺"),
 //                               ),
 //                             );

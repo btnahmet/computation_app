@@ -1,5 +1,5 @@
 import 'package:computation_app/ana_sayfa.dart';
-import 'package:computation_app/kayit_ekleme.dart';
+// import 'package:computation_app/kayit_ekleme.dart';
 import 'package:flutter/material.dart';
 
 void main() {
