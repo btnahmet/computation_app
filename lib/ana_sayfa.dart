@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'tahsilat.dart';
 import 'kayit_ekleme.dart';
@@ -48,11 +47,13 @@ class _AnaSayfaState extends State<AnaSayfa> {
 
     if (updatedCustomer != null) {
       setState(() {
-        double newTotalDebt = double.tryParse(updatedCustomer['totalDebt']) ?? 0.0;
+        double newTotalDebt =
+            double.tryParse(updatedCustomer['totalDebt']) ?? 0.0;
         double currentDebt = double.tryParse(customer['currentDebt']) ?? 0.0;
 
         // Borcu yalnızca eklenen öğün maliyeti kadar artır
-        double previousTotalDebt = double.tryParse(customer['totalDebt']) ?? 0.0;
+        double previousTotalDebt =
+            double.tryParse(customer['totalDebt']) ?? 0.0;
         double debtDifference = newTotalDebt - previousTotalDebt;
 
         _customers[index] = {
@@ -183,9 +184,14 @@ class _AnaSayfaState extends State<AnaSayfa> {
                         children: [
                           const Divider(),
                           ListTile(
-                            title: Text("Toplam Borç: ${customer['totalDebt']}₺"),
+                            title: Text(
+                                "Güncel Borç: ${customer['currentDebt']}₺",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                ),
                             subtitle:
-                                Text("Güncel Borç: ${customer['currentDebt']}₺"),
+                                Text("Toplam Borç: ${customer['totalDebt']}₺"),
                           ),
                           Center(
                             child: ElevatedButton(
@@ -221,8 +227,7 @@ class _AnaSayfaState extends State<AnaSayfa> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                subtitle:
-                                    Text("Maliyet: ${meal['cost3']}₺"),
+                                subtitle: Text("Maliyet: ${meal['cost3']}₺"),
                               ),
                             );
                           }),
