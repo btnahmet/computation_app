@@ -1,4 +1,5 @@
 import 'package:computation_app/ana_sayfa.dart';
+import 'package:computation_app/login.dart';
 // import 'package:computation_app/kayit_ekleme.dart';
 import 'package:flutter/material.dart';
 
@@ -38,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: AnaSayfa(),
+      home: Login(title: "Login"),
     );
   }
 }

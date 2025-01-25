@@ -831,3 +831,35 @@
 //     );
 //   }
 // }
+
+    //  Bütün bu işlemlerden sonra ise eklenen öğünlerin listelenmesini sağlamak ve düzenli bir görünüm elde edebilmek için ise ListView widgeti ile çalışmayı öğrendim ve bu konu hakkında derin bir araştırma yaptım. Ve şuan mevcut projede de uygulamaya çalıştım
+
+    /*
+
+    
+                Container(
+                  height: MediaQuery.of(context).size.height * 0.3,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: _meals.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 10),
+                        child: ListTile(
+                          title: Text('${_meals[index]['name']}'),
+                          subtitle:
+                              Text('Toplam Maliyet: ${_meals[index]['cost3']}₺'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () {},
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {},
+                              ),],), ),);},),),
+
+
+    */

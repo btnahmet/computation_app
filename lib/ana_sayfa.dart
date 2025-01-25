@@ -3,7 +3,8 @@ import 'tahsilat.dart';
 import 'kayit_ekleme.dart';
 
 class AnaSayfa extends StatefulWidget {
-  const AnaSayfa({super.key});
+  const AnaSayfa({super.key, required this.title});
+  final String title;
 
   @override
   State<AnaSayfa> createState() => _AnaSayfaState();
@@ -237,6 +238,7 @@ class _AnaSayfaState extends State<AnaSayfa> {
                   },
                 ),
         ),
+       
         floatingActionButton: FloatingActionButton(
           onPressed: _navigateToKayitEkleme,
           backgroundColor: const Color(0xFF00796B),
