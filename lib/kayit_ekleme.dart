@@ -29,11 +29,11 @@ class _KayitEklemeState extends State<KayitEkleme> {
 
     // Başlangıç değerleri
     _dateController = TextEditingController(
-        text: widget.existingCustomer?['date'] ?? ''); // Tarih
+        text: widget.existingCustomer?['date']?.toString() ?? ''); // Tarih
     _textController = TextEditingController(
-        text: widget.existingCustomer?['name'] ?? ''); // İsim
+        text: widget.existingCustomer?['name']?.toString() ?? ''); // İsim
     _totalDebtController = TextEditingController(
-        text: widget.existingCustomer?['totalDebt'] ?? '0.0'); // Borç
+        text: widget.existingCustomer?['totalDebt']?.toString() ?? '0.0'); // Borç
 
     // Öğünler mevcutsa yükle
     _meals = widget.existingCustomer?['meals'] ?? [];
@@ -50,7 +50,7 @@ class _KayitEklemeState extends State<KayitEkleme> {
   void _updateTotalDebt() {
     double totalDebt = 0.0;
     for (var meal in _meals) {
-      totalDebt += meal['cost3'] ?? 0.0;
+      totalDebt += double.tryParse(meal['cost3']?.toString() ?? '0.0') ?? 0.0;
     }
     _totalDebtController.text = totalDebt.toStringAsFixed(2);
   }
@@ -246,9 +246,9 @@ class _KayitEklemeState extends State<KayitEkleme> {
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 10),
                         child: ListTile(
-                          title: Text('${_meals[index]['name']}'),
+                          title: Text('${_meals[index]['name']?.toString() ?? ''}'),
                           subtitle:
-                              Text('Toplam Maliyet: ${_meals[index]['cost3']}₺'),
+                              Text('Toplam Maliyet: ${_meals[index]['cost3']?.toString() ?? '0.0'}₺'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -256,10 +256,10 @@ class _KayitEklemeState extends State<KayitEkleme> {
                                 icon: const Icon(Icons.edit),
                                 onPressed: () {
                                   _navigateToMealAddPage(
-                                    currentMealName: _meals[index]['name'],
-                                    currentMealCost3: _meals[index]['cost3'],
-                                    currentMealCost2: _meals[index]['cost2'],
-                                    currentMealCost1: _meals[index]['cost1'],
+                                    currentMealName: _meals[index]['name']?.toString(),
+                                    currentMealCost3: double.tryParse(_meals[index]['cost3']?.toString() ?? '0.0'),
+                                    currentMealCost2: double.tryParse(_meals[index]['cost2']?.toString() ?? '0.0'),
+                                    currentMealCost1: double.tryParse(_meals[index]['cost1']?.toString() ?? '0.0'),
                                     index: index,
                                   );
                                 },

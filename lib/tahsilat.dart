@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'database_helper.dart';
 
 class Tahsilat extends StatefulWidget {
   const Tahsilat({
@@ -6,11 +7,13 @@ class Tahsilat extends StatefulWidget {
     required this.title,
     required this.totalDebt,
     this.previousPayments,
+    required this.customerId,
   });
 
   final String title;
   final String totalDebt; // Toplam borç bilgisini almak için
   final List<Map<String, String>>? previousPayments; // Önceki ödemeler
+  final int customerId;
 
   @override
   State<Tahsilat> createState() => _TahsilatState();
@@ -28,16 +31,26 @@ class _TahsilatState extends State<Tahsilat> {
   final TextEditingController _dateController = TextEditingController();
   late List<Map<String, String>> _payments;
   int? _editingIndex; // Düzenlenen ödeme için index
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
 
   @override
   void initState() {
     super.initState();
-    _payments = widget.previousPayments ?? []; // Önceki ödemeleri yükle
+    _payments = <Map<String, String>>[];
+    for (var e in (widget.previousPayments ?? [])) {
+      if (e is Map) {
+        final newMap = <String, String>{};
+        e.forEach((k, v) {
+          newMap[k.toString()] = v?.toString() ?? '';
+        });
+        _payments.add(newMap);
+      }
+    }
     for (int i = 0; i < _labels.length; i++) {
       _controllers.add(TextEditingController());
     }
-    _controllers[0].text = widget.totalDebt; // Toplam Borç
-    _updateCurrentDebt(); // Güncel borcu hesapla ve ayarla
+    _controllers[0].text = widget.totalDebt;
+    _updateCurrentDebt();
   }
 
   @override
@@ -50,9 +63,9 @@ class _TahsilatState extends State<Tahsilat> {
   }
 
   void _updateCurrentDebt() {
-    double totalDebt = double.tryParse(widget.totalDebt) ?? 0.0;
+    double totalDebt = double.tryParse(widget.totalDebt.toString()) ?? 0.0;
     double totalPaid = _payments.fold(0.0, (sum, payment) {
-      return sum + (double.tryParse(payment['amount'] ?? '0') ?? 0.0);
+      return sum + (double.tryParse(payment['amount'].toString()) ?? 0.0);
     });
 
     setState(() {
@@ -60,30 +73,41 @@ class _TahsilatState extends State<Tahsilat> {
     });
   }
 
-  void _addOrUpdatePayment() {
+  Future<void> _addOrUpdatePayment() async {
     if (_editingIndex != null) {
-      // Düzenleme işlemi
+      final payment = _payments[_editingIndex!];
+      await _databaseHelper.updatePayment({
+        'id': int.parse(payment['id'] ?? '0'),
+        'payer': _controllers[1].text,
+        'date': _dateController.text,
+        'amount': _controllers[2].text,
+        'customerId': widget.customerId,
+      });
       setState(() {
         _payments[_editingIndex!] = {
-          "payer": _controllers[1].text,
-          "date": _dateController.text,
-          "amount": _controllers[2].text,
-        };
-        _editingIndex = null; // Düzenleme modundan çık
+          'id': payment['id'] ?? '',
+          'payer': _controllers[1].text,
+          'date': _dateController.text,
+          'amount': _controllers[2].text,
+        }.map((k, v) => MapEntry(k.toString(), v?.toString() ?? ''));
+        _editingIndex = null;
       });
     } else {
-      // Yeni ödeme ekleme işlemi
-      final payment = {
-        "payer": _controllers[1].text,
-        "date": _dateController.text,
-        "amount": _controllers[2].text,
-      };
+      final paymentId = await _databaseHelper.insertPayment({
+        'payer': _controllers[1].text,
+        'date': _dateController.text,
+        'amount': _controllers[2].text,
+        'customerId': widget.customerId,
+      });
       setState(() {
-        _payments.add(payment);
+        _payments.add({
+          'id': paymentId.toString(),
+          'payer': _controllers[1].text,
+          'date': _dateController.text,
+          'amount': _controllers[2].text,
+        }.map((k, v) => MapEntry(k.toString(), v?.toString() ?? '')));
       });
     }
-
-    // Formu temizle ve güncel borcu hesapla
     _controllers[1].clear();
     _controllers[2].clear();
     _dateController.clear();
@@ -93,15 +117,15 @@ class _TahsilatState extends State<Tahsilat> {
   void _editPayment(int index) {
     // Düzenlenecek ödeme bilgilerini alanlara yükle
     final payment = _payments[index];
-    _controllers[1].text = payment['payer'] ?? '';
-    _dateController.text = payment['date'] ?? '';
-    _controllers[2].text = payment['amount'] ?? '';
+    _controllers[1].text = payment['payer']?.toString() ?? '';
+    _dateController.text = payment['date']?.toString() ?? '';
+    _controllers[2].text = payment['amount']?.toString() ?? '';
     setState(() {
       _editingIndex = index; // Düzenlenen ödeme indexi
     });
   }
 
-  void _deletePayment(int index) {
+  Future<void> _deletePayment(int index) async {
     // Silme işlemi öncesinde onay mesajı göster
     showDialog(
       context: context,
@@ -117,8 +141,10 @@ class _TahsilatState extends State<Tahsilat> {
               child: const Text("Hayır"),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(context); // Diyaloğu kapat
+                final payment = _payments[index];
+                await _databaseHelper.deletePayment(int.parse(payment['id']!));
                 setState(() {
                   _payments.removeAt(index); // Ödemeyi listeden sil
                   _updateCurrentDebt(); // Güncel borcu hesapla

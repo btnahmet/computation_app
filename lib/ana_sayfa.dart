@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'tahsilat.dart';
 import 'kayit_ekleme.dart';
+import 'database_helper.dart';
 
 class AnaSayfa extends StatefulWidget {
   const AnaSayfa({super.key, required this.title});
@@ -12,6 +13,30 @@ class AnaSayfa extends StatefulWidget {
 
 class _AnaSayfaState extends State<AnaSayfa> {
   List<Map<String, dynamic>> _customers = []; // Müşteri listesi
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCustomers();
+  }
+
+  Future<void> _loadCustomers() async {
+    final customers = await _databaseHelper.getCustomers();
+    List<Map<String, dynamic>> newCustomers = [];
+    for (var customer in customers) {
+      final meals = await _databaseHelper.getMeals(customer['id']);
+      final payments = await _databaseHelper.getPaymentsAsStringMap(customer['id']);
+      newCustomers.add({
+        ...customer,
+        'meals': meals,
+        'payments': payments,
+      });
+    }
+    setState(() {
+      _customers = newCustomers;
+    });
+  }
 
   // Yeni müşteri ekleme
   void _navigateToKayitEkleme() async {
@@ -21,15 +46,20 @@ class _AnaSayfaState extends State<AnaSayfa> {
         builder: (context) => const KayitEkleme(title: "Yeni Müşteri Kaydı"),
       ),
     );
-
     if (customerData != null) {
-      setState(() {
-        _customers.add({
-          ...customerData,
-          'payments': [], // Yeni müşteri için boş ödeme kaydı
-          'currentDebt': customerData['totalDebt'], // Güncel borç toplam borç
-        });
+      final customerId = await _databaseHelper.insertCustomer({
+        'name': customerData['name'],
+        'date': customerData['date'],
+        'totalDebt': customerData['totalDebt'],
+        'currentDebt': customerData['totalDebt'],
       });
+      for (var meal in customerData['meals']) {
+        await _databaseHelper.insertMeal({
+          ...meal,
+          'customerId': customerId,
+        });
+      }
+      await _loadCustomers();
     }
   }
 
@@ -47,16 +77,34 @@ class _AnaSayfaState extends State<AnaSayfa> {
     );
 
     if (updatedCustomer != null) {
+      double newTotalDebt = double.tryParse(updatedCustomer['totalDebt']?.toString() ?? '') ?? 0.0;
+      double currentDebt = double.tryParse(customer['currentDebt']?.toString() ?? '') ?? 0.0;
+      double previousTotalDebt = double.tryParse(customer['totalDebt']?.toString() ?? '') ?? 0.0;
+      double debtDifference = newTotalDebt - previousTotalDebt;
+
+      await _databaseHelper.updateCustomer({
+        'id': customer['id'],
+        'name': updatedCustomer['name'],
+        'date': updatedCustomer['date'],
+        'totalDebt': updatedCustomer['totalDebt'],
+        'currentDebt': (currentDebt + debtDifference).toStringAsFixed(2),
+      });
+
+      // Mevcut öğünleri sil
+      final meals = await _databaseHelper.getMeals(customer['id']);
+      for (var meal in meals) {
+        await _databaseHelper.deleteMeal(meal['id']);
+      }
+
+      // Yeni öğünleri ekle
+      for (var meal in updatedCustomer['meals']) {
+        await _databaseHelper.insertMeal({
+          ...meal,
+          'customerId': customer['id'],
+        });
+      }
+
       setState(() {
-        double newTotalDebt =
-            double.tryParse(updatedCustomer['totalDebt']) ?? 0.0;
-        double currentDebt = double.tryParse(customer['currentDebt']) ?? 0.0;
-
-        // Borcu yalnızca eklenen öğün maliyeti kadar artır
-        double previousTotalDebt =
-            double.tryParse(customer['totalDebt']) ?? 0.0;
-        double debtDifference = newTotalDebt - previousTotalDebt;
-
         _customers[index] = {
           ...customer,
           ...updatedCustomer,
@@ -69,27 +117,30 @@ class _AnaSayfaState extends State<AnaSayfa> {
   // Tahsilat sayfasına yönlendirme
   void _navigateToTahsilat(int index) async {
     final customer = _customers[index];
-
     final tahsilatData = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => Tahsilat(
           title: "Tahsilat Bilgisi",
-          totalDebt: customer['totalDebt'],
-          previousPayments: customer['payments'] != null
-              ? (customer['payments'] as List<dynamic>)
-                  .map((e) => Map<String, String>.from(e))
-                  .toList()
-              : [],
+          totalDebt: customer['totalDebt']?.toString() ?? '0.0',
+          previousPayments: (customer['payments'] as List<dynamic>)
+            .map((e) {
+              final newMap = <String, String>{};
+              (e as Map).forEach((k, v) {
+                newMap[k.toString()] = v?.toString() ?? '';
+              });
+              return newMap;
+            }).toList(),
+          customerId: customer['id'],
         ),
       ),
     );
-
     if (tahsilatData != null) {
-      setState(() {
-        customer['payments'] = tahsilatData['payments'];
-        customer['currentDebt'] = tahsilatData['currentDebt'];
-      });
+      await _databaseHelper.updateCustomerDebt(
+        customer['id'],
+        double.parse(tahsilatData['currentDebt']),
+      );
+      await _loadCustomers();
     }
   }
 
@@ -103,16 +154,16 @@ class _AnaSayfaState extends State<AnaSayfa> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Diyaloğu kapat
+                Navigator.of(context).pop();
               },
               child: const Text("Hayır"),
             ),
             ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Diyaloğu kapat
-                setState(() {
-                  _customers.removeAt(index); // Kaydı sil
-                });
+              onPressed: () async {
+                Navigator.of(context).pop();
+                final customer = _customers[index];
+                await _databaseHelper.deleteCustomer(customer['id']);
+                await _loadCustomers();
               },
               child: const Text("Evet"),
             ),
@@ -167,7 +218,7 @@ class _AnaSayfaState extends State<AnaSayfa> {
                             fontSize: 17,
                           ),
                         ),
-                        subtitle: Text("Tarih: ${customer['date']}"),
+                        subtitle: Text("Tarih: ${customer['date']?.toString()}"),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -186,13 +237,13 @@ class _AnaSayfaState extends State<AnaSayfa> {
                           const Divider(),
                           ListTile(
                             title: Text(
-                                "Güncel Borç: ${customer['currentDebt']}₺",
+                                "Güncel Borç: ${customer['currentDebt']?.toString()}₺",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
                                 ),
                             subtitle:
-                                Text("Toplam Borç: ${customer['totalDebt']}₺"),
+                                Text("Toplam Borç: ${customer['totalDebt']?.toString()}₺"),
                           ),
                           Center(
                             child: ElevatedButton(
@@ -223,12 +274,12 @@ class _AnaSayfaState extends State<AnaSayfa> {
                                   const EdgeInsets.symmetric(vertical: 4.0),
                               child: ListTile(
                                 title: Text(
-                                  meal['name'],
+                                  meal['name']?.toString() ?? '',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                subtitle: Text("Maliyet: ${meal['cost3']}₺"),
+                                subtitle: Text("Maliyet: ${meal['cost3']?.toString()}₺"),
                               ),
                             );
                           }),
